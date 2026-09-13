@@ -20,10 +20,27 @@ jobs:
         run: |
           node --check enforced/hooks/intent-guard/intent-guard.mjs
           find enforced/mcp/lint-rules/src -name '*.mjs' -exec node --check {} +
+          node --check enforced/mcp/lint-rules/eval/run_eval.mjs
       - name: lint-rules unit tests
         run: node --test enforced/mcp/lint-rules/test/*.test.mjs
+      - name: lint-rules field eval gate (recall>=0.85 precision>=0.90)
+        run: node enforced/mcp/lint-rules/eval/run_eval.mjs
       - name: JSON validity (plugin, hooks)
         run: |
           node -e "JSON.parse(require('fs').readFileSync('plugin.json','utf8'))"
           node -e "JSON.parse(require('fs').readFileSync('enforced/plugin.json','utf8'))"
           node -e "JSON.parse(require('fs').readFileSync('enforced/hooks.json','utf8'))"
+
+  windows-integrity:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: PowerShell integrity suite (fallback WARN is pass)
+        shell: pwsh
+        run: ./test_integrity.ps1 -BasePath . -Junction $env:TEMP/agentic-junction-probe
+      - name: Create Dual-Mount junction for strict run
+        shell: pwsh
+        run: New-Item -ItemType Junction -Path $env:TEMP/agentic-junction-probe -Target $env:GITHUB_WORKSPACE -Force | Out-Null
+      - name: PowerShell strict integrity suite
+        shell: pwsh
+        run: ./test_integrity.ps1 -BasePath . -Junction $env:TEMP/agentic-junction-probe -Strict
