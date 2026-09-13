@@ -16,6 +16,7 @@
 3. **Background & Long-Running Tasks**:
    - Respect asynchronous execution. Never poll background tasks in busy loops; let reactive wakeups notify when execution completes.
    - Exception: when the harness has no completion-notification mechanism (background tasks that never report back), bounded interval polling or an explicit status check is required — do not wait indefinitely for a wakeup that cannot arrive.
+   - Polling is capped: at most 3–5 status checks per wait cycle, never immediate consecutive calls back-to-back. Between checks, yield — schedule a timer/wait, or return the turn to the user with current status. Unbounded spin-polling burns context and rolling quota exactly like the bug it works around.
 
 4. **File Modification via Dedicated Tools Only**:
    - Never modify file contents through the shell (`>`, `>>`, `Set-Content`, `Out-File`, `sed -i`, `tee`, here-docs) when a dedicated file-edit tool (`write_to_file`/`replace_file_content`/edit tool) exists in the harness.
@@ -25,7 +26,12 @@
    - Always quote every path in `rm`/`del`/`Remove-Item`/`Move-Item` and any command that deletes, moves, or overwrites — an unquoted space turns `D:\folder name` into a delete of `D:\folder`.
    - Before executing a recursive or wildcard delete, list the resolved target first (`Get-ChildItem`/`ls` on the exact quoted path) and verify it is the intended directory and inside the workspace. Never fire a bulk delete at a path you have not inspected resolved.
    - Prefer recoverable operations (move to trash/backup dir) over hard deletes when the target is user data.
+   - Guard empty variable expansion: quoting alone does not save you — `rm -rf "$DIR/*"` with `DIR=""` resolves to `/*`. In scripts, use parameter guards (`"${DIR:?}"`) or `set -u`; before any variable-derived delete, `echo`/print the fully expanded path and verify it is non-empty, non-root, and inside the workspace.
 
 6. **Bounded Retry & Loop Breaking**:
    - If a tool call or command fails identically 3 times in a row (same error, same empty/`CLEARED` status), stop retrying: surface the failure to the user with the exact error instead of burning quota in a retry loop.
    - Never fabricate or simulate the output of a failed tool (e.g. inventing search results when `search_web` errors) — a failed tool is reported as failed, and an alternative path is proposed explicitly.
+
+7. **Neutral Engineering Terminology**:
+   - For legitimate defensive/maintenance work (vulnerability remediation, patch verification, permission hardening, test-fixture isolation), prefer standard operations vocabulary (`audit`, `remediate`, `isolate`, `harden`, `validate`) over charged jargon (`exploit`, `bypass`, `hack`) in commands, comments, and prompt text — the latter trips host safety filters on ordinary engineering tasks.
+   - Scope limit: this governs phrasing of legitimate work only. It never authorizes disguising a genuinely harmful action with euphemisms — harmful intent stays refused regardless of vocabulary.
