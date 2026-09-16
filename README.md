@@ -1,6 +1,13 @@
-# LazyAgentic — Agentic Sanctuary & Situational Routing
+# LazyAgentic — Agentic Sanctuary & Prompt Governance
 
-LazyAgentic is the 4th core plugin in the Lazy series (`lazyantigravity`, `lazyforensic`, `lazyothers`, `lazyagentic`).
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](https://opensource.org/licenses/MIT)
+[![Architecture: Policy Engine](https://img.shields.io/badge/Architecture-Policy%20Engine-orange.svg?style=flat-square)](RULES.md)
+[![Integrity: Fail-Closed](https://img.shields.io/badge/Integrity-Fail--Closed-red.svg?style=flat-square)](rules/00-instinct.md)
+
+> **Prompt Governance & Deterministic Policy Engine for Autonomous Coding Agents**  
+> Implementing the Agentic Sanctuary architecture, situational path reference routing (`RULES.md`), and fail-closed anti-hallucination mandates.
+
+LazyAgentic is the 4th core plugin in the Lazy series (`LAZYANTIGRAVITY`, `lazyforensic`, `lazyothers`, `lazyagentic`).
 
 Default host: **Google Antigravity**. Keep the session UI on **Gemini 3.8 Flash (High)**. This plugin is rules-only (no hooks, no MCP). The host does not rewrite the session model per role. Enforcement is by model compliance, not mechanical blocking.
 
