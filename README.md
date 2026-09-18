@@ -9,27 +9,46 @@
 
 LazyAgentic is the 4th core plugin in the Lazy series (`LAZYANTIGRAVITY`, `lazyforensic`, `lazyothers`, `lazyagentic`).
 
-Default host: **Google Antigravity**. Keep the session UI on **Gemini 3.8 Flash (High)**. This plugin is rules-only (no hooks, no MCP). The host does not rewrite the session model per role. Enforcement is by model compliance, not mechanical blocking.
+LazyAgentic is the governance plugin in the Lazy series. The main plugin is **rules-only**: no registered hooks, MCP servers, startup processes, installers, telemetry, or model switching. Enforcement depends on model compliance, not mechanical blocking. Host-specific entry files lead to `_entry.md` and `RULES.md`.
 
-It implements the **Agentic Sanctuary** architecture adapted from vesperchant's Gemini guide:
-- **Situational Path Reference System (`RULES.md` v3.28)**: On-demand modular rule loading to prevent context-window bloat. Numbers `02/05/06/10` are RESERVED.
-- **Fail-Closed Instinct (`rules/00-instinct.md`)**: Anti-hallucination mandate ensuring uncertainty is verified against primary sources.
-- **Natural Korean Prose Policy (`rules/03-korean-natural-prose.md`)**: Eradicating translation-ese, zero-anaphora, and AI signature cliches.
-- **Dual-Mount Sanctuary**: Linked to `~/agentic` via Windows Directory Junction (macOS/Linux: symlink). If the junction is missing, agents must read `~/.gemini/config/plugins/lazyagentic/` instead. Verify with `test_integrity.ps1` (Windows) or `test_integrity.sh` (macOS/Linux).
-- **Version check**: `node scripts/sync-versions.mjs [--base <plugin-dir>]` verifies `plugin.json` version/rulesVersion, `RULES.md` Version, and `00-instinct` Version (exit 1 on mismatch).
-  - Hook scaffold at `hooks/intent-guard/intent-guard.mjs` is opt-in only; `plugin.json` keeps rules-only (no `hooks` key).
-- **Local verification only (CI workflow not wired — workflow scope constraint)**:
-  - `bash test_integrity.sh --base <plugin-dir> --junction ~/agentic`
-  - `pwsh -File test_integrity.ps1 -BasePath <plugin-dir> -Junction <junction>`
-  - `node scripts/sync-versions.mjs --base <plugin-dir>`
-- **Enforced split (`enforced/`)**: a separate opt-in plugin (`lazyagentic-enforced`) bundling PreToolUse intent-guard + Stop turn-audit + MCP lint-rules. Clone it as its own plugin directory — see `enforced/README.md`. The main plugin stays rules-only.
+## What ships
 
-## Lazy ecosystem (repo boundaries)
+- **9 rule modules**, routed on demand by `RULES.md` v3.28.0. Numbers `02/05/06/10` are reserved.
+- Primary-source verification, uncertainty disclosure, workspace safety, scope reporting, Korean narrative style, and modern Go guidance.
+- Optional Dual-Mount access through `~/agentic` (Windows junction or POSIX symlink). When absent, use the installed plugin path. No link is created automatically.
+- **Separate opt-in package `enforced/`**: two hook registrations using one duplicated guard implementation, plus one persistent stdio MCP prose-scanner tool with 13 regex rules. See [enforced/README.md](enforced/README.md) for installation-root selection, host adapters, mode semantics, and limits.
 
-- `LAZYANTIGRAVITY` — runtime umbrella: hook aggregation, shared-skill materialization, bundled MCP runtimes
-- `lazyforensic` — forensic / Korean-law domain plugin
-- `lazyothers` — legal-document / HWP / humanize domain plugin
-- `lazyagentic` (this repo) — rules-only governance plugin (Dual-Mount `~/agentic`)
-- [`korean-law-mcp`](https://github.com/daeryundf2-prog/korean-law-mcp) — Korean-law MCP server, cloned+built by lazyforensic
+The optional package is heuristic assistance, not a forensic collector, source verifier, security sandbox, or guarantee that a host blocks an operation. The main manifest remains unchanged when these files are present.
 
-Shared asset: `scripts/coverage_audit.mjs` is kept byte-identical across lazyforensic (canonical), lazyothers, and LAZYANTIGRAVITY — sync all three on change.
+## Evidence preservation
+
+Style rules apply to analyst-authored narrative, not originals or extracted evidence. Preserve quotations, transcripts, OCR output, names, dates, numbers, identifiers, and citations verbatim. Keep observations, source quotations, and interpretations distinct; record source locations and disclose gaps. Work on copies when transformation is authorized. The scanner is advisory and never rewrites sources; callers explicitly mark source text or quotation lines to exclude.
+
+## Verification and CI
+
+GitHub Actions defines Linux Node 24 integrity/syntax/unit checks and Windows PowerShell integrity checks. No dependency installation is needed for this repository. From its root:
+
+```bash
+bash test_integrity.sh --base . --junction ./missing-junction
+pwsh -File test_integrity.ps1 -BasePath . -Junction ./missing-junction
+node scripts/sync-versions.mjs --base .
+node --test enforced/mcp/lint-rules/test/*.test.mjs
+node enforced/mcp/lint-rules/eval/run_eval.mjs
+node --check hooks/intent-guard/intent-guard.mjs
+node --check enforced/hooks/intent-guard/intent-guard.mjs
+node --check enforced/mcp/lint-rules/src/cli.mjs
+```
+
+A missing junction is a warning unless integrity `--strict` / `-Strict` is requested. Integrity strict mode only controls the filesystem verification script; it is unrelated to `LAZYAGENTIC_GUARD_MODE=strict`. Version checks align the rules track while checking presence of the independent plugin and instinct version tracks.
+
+Tests cover scanner behavior, corpus thresholds, a real child-process stdio client, guard logging and modes, duplicate consistency, and simulated installation outside the working directory. They do not prove live host integration or real-world forensic accuracy. The original 60-row corpus remains a baseline; added synthetic Korean report cases test preservation and benign names/numbers. The evaluation script reports metrics; unit assertions enforce thresholds. No lint/typecheck package commands are defined; JavaScript syntax and behavior checks are the local gates.
+
+## Repository boundaries
+
+- `lazyagentic` (this repository): governance rules and optional local heuristics.
+- `LAZYANTIGRAVITY`: runtime umbrella, hook aggregation, shared skills, bundled MCP runtimes.
+- `lazyforensic`: forensic and Korean-law domain plugin.
+- `lazyothers`: legal-document, HWP, and humanize domain plugin.
+- `korean-law-mcp`: separate Korean-law server maintained with the domain plugin.
+
+No capabilities from those other repositories are bundled or activated by the main LazyAgentic manifest.

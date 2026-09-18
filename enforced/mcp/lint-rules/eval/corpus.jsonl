@@ -58,3 +58,15 @@
 {"id":"C28","label":"clean","rule":"none","text":"로그 축적 방식을 개선하고 보관 주기를 조정했다."}
 {"id":"C29","label":"clean","rule":"none","text":"성과가 서서히 개선되고 있다는 지표를 확인했다."}
 {"id":"C30","label":"clean","rule":"none","text":"빠르게 대응 방안을 마련하고 실행 계획을 공유했다."}
+{"id":"C31","label":"clean","rule":"none","text":"박다은·박고은 조사관이 2026-09-17 09:30에 원본 2개를 확인했다."}
+{"id":"C32","label":"clean","rule":"none","text":"파일 크기는 1,024바이트이며 SHA-256 값은 별도 목록에 기록했다."}
+{"id":"C33","label":"clean","rule":"none","text":"김민수는 ‘14시 05분에 도착했다’고 진술했다. 도착 시각은 독립적으로 확인하지 못했다."}
+{"id":"C34","label":"clean","rule":"none","text":"증거번호 E-2026-017의 복제본만 분석했다. 원본 매체는 변경하지 않았다."}
+{"id":"C35","label":"clean","rule":"none","text":"확인한 범위는 제공된 로그 120줄이다. 누락된 3분 구간은 검토하지 못했다."}
+{"id":"C36","label":"clean","rule":"none","text":"2026-09-17T00:30:00Z와 2026-09-17 09:30:00+09:00는 같은 시각이다."}
+{"id":"C37","label":"clean","rule":"none","contentKind":"source","text":"진술 원문: ‘첫날부터 매우 중요한 일을 맡았다.’"}
+{"id":"C38","label":"clean","rule":"none","contentKind":"source","text":"OCR 원문: AI에 의해 작성되어진 자료 / 박다은 / 2026.09.17 / 1,024"}
+{"id":"C39","label":"clean","rule":"none","preservedLines":[2],"text":"분석자 의견과 인용을 구분했다.\n> 매우 중요한 자료에 의해 판단되어진다."}
+{"id":"C40","label":"clean","rule":"none","contentKind":"source","text":"인용문: ‘핵심적인 역할을 수행했고 눈에 띄게 개선되었다.’ [자료 2, 17쪽]"}
+{"id":"V31","label":"violation","rule":"park-inflected","text":"값을 박고서 처리했다."}
+{"id":"V32","label":"violation","rule":"cliche-very-important","preservedLines":[1],"text":"원문: ‘핵심적인 자료’\n이 분석은 매우 중요합니다."}

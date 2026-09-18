@@ -75,6 +75,23 @@ describe("scan_korean_prose", () => {
     }
   });
 
+  it("retains verb-form detection without matching report names", () => {
+    for (const form of ["박다", "박아넣다", "박아 넣다", "박아서", "박았다", "박어", "박는다", "박고", "박을", "박음", "박고서"]) {
+      assert.ok(scanKoreanProse(`값을 ${form} 처리했다.`).length > 0, form);
+    }
+  });
+
+  it("preserves source text and explicitly marked quotation lines without rewriting", () => {
+    const text = '박다은 조사관의 기록\n인용: "매우 중요한 자료에 의해 판단되어진다."\n이 기능은 매우 중요합니다.';
+    const original = text;
+    assert.deepEqual(scanKoreanProse(text, { contentKind: "source" }), []);
+    const hits = scanKoreanProse(text, { preservedLines: [1, 2] });
+    assert.equal(hits.length, 1);
+    assert.equal(hits[0].line, 3);
+    assert.equal(text, original);
+    assert.deepEqual(scanKoreanProse("박다은·박고은 조사관이 2026-09-17 09:30에 원본 2개를 확인했다."), []);
+  });
+
   it("writes lint log line when LAZYAGENTIC_LINT_LOG set", () => {
     const dir = mkdtempSync(join(tmpdir(), "lintlog-"));
     const log = join(dir, "lint.log");
@@ -101,7 +118,7 @@ describe("scan_korean_prose", () => {
     const rows = readFileSync(new URL("../eval/corpus.jsonl", import.meta.url), "utf8").trim().split("\n").map((l) => JSON.parse(l));
     const viols = rows.filter((r) => r.label === "violation");
     let hit = 0; const missed = [];
-    for (const r of viols) { if (scanKoreanProse(r.text).length > 0) hit++; else missed.push(`${r.id}[${r.rule}]`); }
+    for (const r of viols) { if (scanKoreanProse(r.text, r).length > 0) hit++; else missed.push(`${r.id}[${r.rule}]`); }
     const rec = hit / viols.length;
     assert.ok(rec >= 0.85, `recall ${rec.toFixed(3)}=${hit}/${viols.length} missed: ${missed.join(", ")}`);
   });
@@ -110,9 +127,9 @@ describe("scan_korean_prose", () => {
     const rows = readFileSync(new URL("../eval/corpus.jsonl", import.meta.url), "utf8").trim().split("\n").map((l) => JSON.parse(l));
     let tp = 0, fp = 0; const falses = [];
     for (const r of rows) {
-      const h = scanKoreanProse(r.text).length > 0;
+      const h = scanKoreanProse(r.text, r).length > 0;
       if (r.label === "violation" && h) tp++;
-      if (r.label === "clean" && h) { fp++; falses.push(`${r.id}=>${scanKoreanProse(r.text).map((x) => x.rule).join(",")}`); }
+      if (r.label === "clean" && h) { fp++; falses.push(`${r.id}=>${scanKoreanProse(r.text, r).map((x) => x.rule).join(",")}`); }
     }
     const prec = tp / (tp + fp || 1);
     assert.ok(prec >= 0.90, `precision ${prec.toFixed(3)}=${tp}/${tp + fp} falses: ${falses.join(", ")}`);

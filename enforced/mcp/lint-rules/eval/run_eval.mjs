@@ -6,7 +6,7 @@ const rows = readFileSync(new URL("./corpus.jsonl", import.meta.url), "utf8")
 let tp = 0, fp = 0, fn = 0, tn = 0;
 const misses = [], falses = [], perRule = {};
 for (const r of rows) {
-  const hit = scanKoreanProse(r.text).length > 0;
+  const hit = scanKoreanProse(r.text, r).length > 0;
   const exp = r.label === "violation";
   if (exp && hit) tp++;
   else if (!exp && hit) { fp++; falses.push(r); }

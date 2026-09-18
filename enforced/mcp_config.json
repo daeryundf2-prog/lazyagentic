@@ -2,7 +2,7 @@
   "mcpServers": {
     "lint-rules": {
       "command": "node",
-      "args": ["./mcp/lint-rules/src/cli.mjs"]
+      "args": ["${PLUGIN_ROOT}/mcp/lint-rules/src/cli.mjs"]
     }
   }
 }

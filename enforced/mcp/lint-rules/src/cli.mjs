@@ -1,18 +1,16 @@
 #!/usr/bin/env node
-// lint-rules MCP server skeleton (dependency-free).
-// Tool: scan_korean_prose — 13 regex rules (zero-anaphora excluded: auto-detection infeasible).
-// Rule breakdown: 박다 variants 3 + double-passive 2 + ~에의해 1 + ~축 1
-//   + experience-possession 1 + 투입첫날부터 1 + AI-cliche 4 = 13.
-// IO: stdin JSON -> stdout JSON. Import: { scanKoreanProse } from "./cli.mjs".
-import { appendFileSync } from "node:fs";
+import { appendFileSync, realpathSync } from "node:fs";
+import { createInterface } from "node:readline";
+import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 function llog(v){try{const p=process.env.LAZYAGENTIC_LINT_LOG;if(!p)return;appendFileSync(p,JSON.stringify({ts:new Date().toISOString(),count:v.length,rules:[...new Set(v.map(x=>x.rule))]})+"\n");}catch{}}
 
 export const TOOL_NAME = "scan_korean_prose";
 
 export const RULES = [
-  { id: "park-da", pattern: /박다/, description: "박다 원형 금지 (코드를 박다)" },
+  { id: "park-da", pattern: /(?<![가-힣])박다(?![가-힣])/, description: "박다 원형 금지 (코드를 박다)" },
   { id: "park-compound", pattern: /박아\s*넣/, description: "박다 변형 금지 (박아넣다)" },
-  { id: "park-inflected", pattern: /박아(서|넣)|박았|박어|박는|박고|박을|박음/, description: "박다 굴절형 금지 (박아서/박았다/박는다/박고)" },
+  { id: "park-inflected", pattern: /(?<![가-힣])(?:박아(서|넣)|박았|박어|박는|박고(?:서)?(?![가-힣])|박을|박음)/, description: "박다 굴절형 금지 (박아서/박았다/박는다/박고)" },
   { id: "double-passive-ji", pattern: /되어(지|진)/, description: "이중피동 금지 (판단되어진다/되어진다)" },
   { id: "double-passive-jyeo", pattern: /되어져/, description: "이중피동 금지 (작성되어져 있다)" },
   { id: "by-passive", pattern: /에\s*의(해|하여)/, description: "~에의해 수동태 금지 (AI에 의해/의하여 생성)" },
@@ -25,11 +23,13 @@ export const RULES = [
   { id: "cliche-noticeably", pattern: /눈에\s*띄게/, description: "AI클리셰 금지 (눈에 띄게)" },
 ];
 
-export function scanKoreanProse(text) {
+export function scanKoreanProse(text, options = {}) {
   const violations = [];
+  const preserved = new Set(options.preservedLines ?? []);
   const lines = String(text ?? "").split(/\r?\n/);
   lines.forEach((raw, idx) => {
     const lineNo = idx + 1;
+    if (options.contentKind === "source" || preserved.has(lineNo)) return;
     const excerpt = raw.trim().slice(0, 120);
     for (const r of RULES) {
       if (r.pattern.test(raw)) {
@@ -43,65 +43,81 @@ export function scanKoreanProse(text) {
 
 export const TOOL_DEF = {
   name: TOOL_NAME,
-  description: "Scan Korean prose for 13 translation-ese / cliche rules",
+  description: "Read-only advisory scan of authored Korean narrative; never rewrites text. Mark originals as source or identify quotation lines explicitly. Findings are stylistic heuristics, not evidence verification.",
   inputSchema: {
     type: "object",
-    properties: { text: { type: "string", description: "Korean text to scan" } },
+    properties: {
+      text: { type: "string", description: "Korean text to scan" },
+      contentKind: { type: "string", enum: ["narrative", "source"], default: "narrative" },
+      preservedLines: { type: "array", items: { type: "integer", minimum: 1 }, description: "1-based lines containing quotations, names or extracted originals to exclude" },
+    },
     required: ["text"],
+    additionalProperties: false,
   },
 };
 
-function extractText(input) {
-  if (typeof input === "string") return input;
-  if (input == null || typeof input !== "object") return "";
-  if (typeof input.text === "string") return input.text;
-  if (input.arguments && typeof input.arguments.text === "string") return input.arguments.text;
-  if (input.params?.arguments?.text) return String(input.params.arguments.text);
-  if (input.params?.text) return String(input.params.text);
-  return "";
+const isObject = (value) => value !== null && typeof value === "object" && !Array.isArray(value);
+const errorResponse = (id, code, message) => ({ jsonrpc: "2.0", id, error: { code, message } });
+
+function validArguments(args) {
+  return isObject(args) && typeof args.text === "string" &&
+    Object.keys(args).every((key) => Object.hasOwn(TOOL_DEF.inputSchema.properties, key)) &&
+    (args.contentKind === undefined || ["narrative", "source"].includes(args.contentKind)) &&
+    (args.preservedLines === undefined || (Array.isArray(args.preservedLines) &&
+      args.preservedLines.every((line) => Number.isInteger(line) && line > 0 && line <= args.text.split(/\r?\n/).length)));
 }
 
-async function readStdin() {
-  let d = "";
-  for await (const c of process.stdin) d += c;
-  return d.trim();
+function handleRequest(input) {
+  const id = isObject(input) && (typeof input.id === "string" || Number.isInteger(input.id)) ? input.id : null;
+  if (!isObject(input) || input.jsonrpc !== "2.0" || typeof input.method !== "string" ||
+      (Object.hasOwn(input, "id") && id === null) ||
+      (input.params !== undefined && !isObject(input.params))) {
+    return errorResponse(id, -32600, "Invalid Request");
+  }
+  if (!Object.hasOwn(input, "id")) return null;
+  const result = (value) => ({ jsonrpc: "2.0", id, result: value });
+  switch (input.method) {
+    case "initialize":
+      if (typeof input.params?.protocolVersion !== "string" || !isObject(input.params.capabilities) ||
+          !isObject(input.params.clientInfo) || typeof input.params.clientInfo.name !== "string" ||
+          typeof input.params.clientInfo.version !== "string") {
+        return errorResponse(id, -32602, "Invalid initialization parameters");
+      }
+      return result({ protocolVersion: "2024-11-05", serverInfo: { name: "lint-rules", version: "1.0.0" }, capabilities: { tools: {} } });
+    case "ping":
+      return result({});
+    case "tools/list":
+      return result({ tools: [TOOL_DEF] });
+    case "tools/call": {
+      if (input.params?.name !== TOOL_NAME || !validArguments(input.params.arguments)) {
+        return errorResponse(id, -32602, "Unknown tool or invalid arguments");
+      }
+      try {
+        const args = input.params.arguments;
+        const violations = scanKoreanProse(args.text, args);
+        const payload = { tool: TOOL_NAME, violations, contentKind: args.contentKind ?? "narrative", preservedLines: args.preservedLines ?? [] };
+        return result({ content: [{ type: "text", text: JSON.stringify(payload) }], isError: false });
+      } catch {
+        return result({ content: [{ type: "text", text: "Scan failed" }], isError: true });
+      }
+    }
+    default:
+      return errorResponse(id, -32601, "Method not found");
+  }
 }
 
 async function main() {
-  const raw = await readStdin();
-  let input = {};
-  try {
-    input = raw ? JSON.parse(raw) : {};
-  } catch {
-    console.log(JSON.stringify({ tool: TOOL_NAME, violations: [], error: "unparseable input" }));
-    return;
+  const lines = createInterface({ input: process.stdin, crlfDelay: Infinity });
+  for await (const line of lines) {
+    if (!line.trim()) continue;
+    let input;
+    try { input = JSON.parse(line); }
+    catch { process.stdout.write(`${JSON.stringify(errorResponse(null, -32700, "Parse error"))}\n`); continue; }
+    const response = handleRequest(input);
+    if (response) process.stdout.write(`${JSON.stringify(response)}\n`);
   }
-  const method = input.method || "";
-  if (method === "initialize") {
-    console.log(JSON.stringify({ protocolVersion: "2024-11-05", serverInfo: { name: "lint-rules", version: "1.0.0" }, capabilities: { tools: {} }, id: input.id ?? null }));
-    return;
-  }
-  if (method === "tools/list") {
-    console.log(JSON.stringify({ tools: [TOOL_DEF], id: input.id ?? null }));
-    return;
-  }
-  if (method === "tools/call") {
-    const name = input.params?.name || "";
-    const text = extractText(input.params || {});
-    if (name && name !== TOOL_NAME) {
-      console.log(JSON.stringify({ error: `unknown tool: ${name}`, id: input.id ?? null }));
-      return;
-    }
-    const violations = scanKoreanProse(text);
-    console.log(JSON.stringify({ tool: TOOL_NAME, violations, id: input.id ?? null }));
-    return;
-  }
-  const text = extractText(input);
-  const violations = scanKoreanProse(text);
-  console.log(JSON.stringify({ tool: TOOL_NAME, violations }));
 }
 
-const invoked = (process.argv[1] || "").endsWith("cli.mjs");
-if (invoked) {
-  main();
+if (process.argv[1] && realpathSync(resolve(process.argv[1])) === realpathSync(fileURLToPath(import.meta.url))) {
+  main().catch(() => { process.stderr.write("lint-rules transport failed\n"); process.exitCode = 1; });
 }
