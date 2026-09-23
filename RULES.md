@@ -78,3 +78,8 @@ Consult and read the target rule file immediately when your task matches any of 
 - **Trigger**: When the user asks to enumerate, list, review, audit, or inventory items (전부/모두/빠짐없이/전수, "review all", "list every").
 - **Target Path**: [~/agentic/rules/12-exhaustive-enumeration.md](~/agentic/rules/12-exhaustive-enumeration.md)
 - **Directive**: Anchor item counts mechanically to the source; never collapse enumeration into top-N salience picks; attach per-item evidence anchors; declare uncovered scope at the end of every enumeration; completeness claims require coverage receipts.
+
+### 13. Technology Vetting & Dependency Gate
+- **Trigger**: When evaluating, recommending, comparing, or integrating external open-source tools, frameworks, models, or dependencies into the Lazy ecosystem.
+- **Target Path**: [~/agentic/rules/13-tech-vetting-gate.md](~/agentic/rules/13-tech-vetting-gate.md)
+- **Directive**: Enforce the 3 Mandatory Hard Gates: Legal Defensibility Gate (Chain of Custody CoC preservation, strict ban on third-party hosted proxies in evidence collection, tamper-evident vs tamper-proof distinction); Dependency Cost Gate (no hiding GPU/Docker/Cloud costs, enforce BYOB for heavy models, ban unverified marketing claims like "99%"); Receipt-First Policy (never claim total counts or metrics without pre-computed mechanical receipts).
