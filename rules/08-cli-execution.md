@@ -35,3 +35,7 @@
 7. **Neutral Engineering Terminology**:
    - For legitimate defensive/maintenance work (vulnerability remediation, patch verification, permission hardening, test-fixture isolation), prefer standard operations vocabulary (`audit`, `remediate`, `isolate`, `harden`, `validate`) over charged jargon (`exploit`, `bypass`, `hack`) in commands, comments, and prompt text — the latter trips host safety filters on ordinary engineering tasks.
    - Scope limit: this governs phrasing of legitimate work only. It never authorizes disguising a genuinely harmful action with euphemisms — harmful intent stays refused regardless of vocabulary.
+
+8. **Untrusted `.env` Runtime Hijacking Sandbox Defense (Ouroboros Isolation)**:
+   - When inspecting or running commands in a workspace, NEVER source `.env` blindly or allow arbitrary workspace `.env` files to inject runtime hijacking environment variables (`NODE_OPTIONS`, `PYTHONPATH`, `PYTHONSTARTUP`, `PERL5OPT`, `RUBYOPT`, `LD_PRELOAD`, `DYLD_INSERT_LIBRARIES`).
+   - Any CLI harness command execution must sanitize or explicitly deny module-resolution overrides from untrusted sources to preserve host and subagent sandbox integrity.
