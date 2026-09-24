@@ -42,6 +42,8 @@ jobs:
           node-version: "24"
       - name: Contract drift check (checkout byte integrity)
         run: node scripts/check_contract_drift.mjs
+      - name: lint-rules + intent-guard unit tests
+        run: node --test enforced/mcp/lint-rules/test/*.test.mjs
       - name: PowerShell integrity suite (fallback WARN is pass)
         shell: pwsh
         run: ./test_integrity.ps1 -BasePath . -Junction $env:TEMP/agentic-junction-probe
