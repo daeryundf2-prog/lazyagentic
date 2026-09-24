@@ -2,10 +2,10 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](https://opensource.org/licenses/MIT)
 [![Architecture: Policy Engine](https://img.shields.io/badge/Architecture-Policy%20Engine-orange.svg?style=flat-square)](RULES.md)
-[![Integrity: Fail-Closed](https://img.shields.io/badge/Integrity-Fail--Closed-red.svg?style=flat-square)](rules/00-instinct.md)
+[![Integrity: Advisory](https://img.shields.io/badge/Integrity-Advisory%20(fail--closed%20opt--in)-yellow.svg?style=flat-square)](rules/00-instinct.md)
 
-> **Prompt Governance & Deterministic Policy Engine for Autonomous Coding Agents**  
-> Implementing the Agentic Sanctuary architecture, situational path reference routing (`RULES.md`), and fail-closed anti-hallucination mandates.
+> **Prompt Governance & Advisory Policy Rules for Autonomous Coding Agents**  
+> Implementing the Agentic Sanctuary architecture, situational path reference routing (`RULES.md`), and anti-hallucination mandates. Rules-only: enforcement depends on model compliance; mechanical blocking is opt-in via `enforced/` and is advisory by default.
 
 LazyAgentic is the 4th core plugin in the Lazy series (`LAZYANTIGRAVITY`, `lazyforensic`, `lazyothers`, `lazyagentic`).
 
