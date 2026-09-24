@@ -137,5 +137,16 @@ else
 fi
 echo ""
 
+if [ -f "$BASE/contracts/PIN.json" ] && [ -f "$BASE/scripts/check_contract_drift.mjs" ]; then
+  if node "$BASE/scripts/check_contract_drift.mjs"; then
+    echo "[PASS] contracts vendored files match PIN"
+  else
+    echo "[FAIL] contracts drift detected"; fail=1
+  fi
+else
+  echo "[SKIP] contracts not vendored in $BASE — 설치본 갱신 후 활성화"
+fi
+echo ""
+
 if [ "$fail" -ne 0 ]; then echo ">>> SOME TESTS FAILED <<<"; exit 1; fi
 echo ">>> ALL LAZYAGENTIC TESTS PASSED <<<"
