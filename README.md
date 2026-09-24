@@ -1,7 +1,7 @@
 # LazyAgentic — Agentic Sanctuary & Prompt Governance
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](https://opensource.org/licenses/MIT)
-[![Architecture: Policy Engine](https://img.shields.io/badge/Architecture-Policy%20Engine-orange.svg?style=flat-square)](RULES.md)
+[![Architecture: Rules + opt-in guards](https://img.shields.io/badge/Architecture-Rules%20%2B%20opt--in%20guards-orange.svg?style=flat-square)](RULES.md)
 [![Integrity: Advisory](https://img.shields.io/badge/Integrity-Advisory%20(fail--closed%20opt--in)-yellow.svg?style=flat-square)](rules/00-instinct.md)
 
 > **Prompt Governance & Advisory Policy Rules for Autonomous Coding Agents**  

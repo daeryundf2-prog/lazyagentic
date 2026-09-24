@@ -71,8 +71,14 @@ Command authority is derived strictly from actual arrival channel provenance, ne
 - **User Skill Invocation**: User invokes a skill instructing branch creation before commit—trusted command, obey.
 - **Agent-Triggered Skill**: Skill invoked automatically by trigger configuration instructing pre-commit security check—trusted command, obey.
 
-## Mechanical Enforcement & Lifecycle Guardrails (3-Tier Hook Architecture)
-In agentic frameworks (Claude Code, Gemini Antigravity, AGY CLI), an agent cannot exit a turn without passing through configured lifecycle guardrails. `rule 00-instinct` is mechanically enforced via three complementary hook mechanisms before every turn-ending response:
+## Mechanical Enforcement & Lifecycle Guardrails — Integration Pattern (Not Implemented)
+
+> **Trust level: `planned`.** The 3-tier hooks below are a design pattern for
+> hosts with lifecycle runtimes (Claude Code, Antigravity, AGY CLI), not active
+> here — no `hooks` key in `plugin.json`. `judge`-mode model audit and
+> `PreInvocation` injection are unimplemented.
+
+In agentic frameworks, an agent cannot exit a turn without passing through configured lifecycle guardrails. The pattern would enforce `rule 00-instinct` via three complementary hook mechanisms before every turn-ending response:
 
 ### 1. Turn-End Audit Hook (`Stop` / `PostInvocation` Event)
 - **Execution Lifecycle**: When the agent finishes tool execution and attempts to conclude its turn (`Stop` or `PostInvocation`), runtime intercepts the event before delivering response to user.
@@ -98,7 +104,18 @@ In agentic frameworks (Claude Code, Gemini Antigravity, AGY CLI), an agent canno
   - Deterministically catches unconfirmed destructive actions, unauthorized git commits, or out-of-scope code generation during plan-only phases, prompting for explicit user confirmation (`"permissionDecision": "ask"`).
 
 ### Reference Implementation & Runtime Activation
-- **Status**: Minimal scaffold ships at `hooks/intent-guard/intent-guard.mjs` (STOP/PreToolUse: transcript check + 3 unverified-claim keywords → `decision:continue`, else approve). Plugin stays rules-only — no `hooks` key in `plugin.json` (see README "no hooks, no MCP").
+- **Status**: Optional opt-in scaffold ships at `enforced/hooks/intent-guard/intent-guard.mjs`
+  (byte-identical copy at `hooks/intent-guard/intent-guard.mjs`). What it actually does:
+  - `PreToolUse`: destructive shell patterns — `rm`/`del`/`Remove-Item` with
+    recursive, wildcard, variable-expanded, or unquoted paths, plus shell
+    write-redirects into source files — return `permissionDecision: "ask"`;
+    else `"allow"`.
+  - `Stop`: audits the last assistant message for praise openers, reflexive
+    follow-up offers, and 3+ item lists without a scope declaration — emits an
+    advisory `systemMessage` (`decision: "block"` only under
+    `LAZYAGENTIC_GUARD_MODE=strict` on an active stop hook). Fails open on
+    unavailable input.
+  Plugin stays rules-only — no `hooks` key in `plugin.json` (see README "no hooks, no MCP").
   The 3-tier description above is an integration pattern for hosts that support lifecycle hooks;
   wire the scaffold path below only on hosts with hook runtimes.
 - **If you adopt it**: place your guard script at `hooks/intent-guard/intent-guard.mjs`
