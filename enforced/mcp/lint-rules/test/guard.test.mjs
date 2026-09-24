@@ -98,3 +98,69 @@ test("isolated enforced-root installation resolves hooks and MCP independently o
 test("guard copies remain byte-identical", () => {
   assert.equal(readFileSync(guard, "utf8"), readFileSync(join(root, "enforced/hooks/intent-guard/intent-guard.mjs"), "utf8"));
 });
+
+function pre(input) {
+  return { hook_event_name: "PreToolUse", tool_name: "Bash", tool_input: { command: input } };
+}
+
+test("non-shell tool names pass through with an empty envelope", (t) => {
+  const dir = sandbox(t);
+  const out = run(guard, JSON.stringify({ hook_event_name: "PreToolUse", tool_name: "Read", tool_input: { command: "rm -rf /" } }), dir);
+  assert.deepEqual(out, {});
+});
+
+test("plain delete without escalation flags is allowed", (t) => {
+  const dir = sandbox(t);
+  const out = run(guard, JSON.stringify(pre("rm report.txt")), dir);
+  assert.equal(out.hookSpecificOutput.permissionDecision, "allow");
+});
+
+test("variable-expanded delete asks for verification", (t) => {
+  const dir = sandbox(t);
+  const out = run(guard, JSON.stringify(pre("rm ${JUNK}/*")), dir);
+  assert.equal(out.hookSpecificOutput.permissionDecision, "ask");
+  assert.match(out.hookSpecificOutput.permissionDecisionReason, /variable-expanded delete/);
+});
+
+test("guarded variable expansion is not flagged as variable delete", (t) => {
+  const dir = sandbox(t);
+  const out = run(guard, JSON.stringify(pre("rm ${JUNK:?}/file")), dir);
+  assert.doesNotMatch(out.hookSpecificOutput.permissionDecisionReason ?? "", /variable-expanded/);
+});
+
+test("unquoted path with spaces asks for quoting verification", (t) => {
+  const dir = sandbox(t);
+  const out = run(guard, JSON.stringify(pre("rm C:\\Users\\HP\\some file.txt")), dir);
+  assert.equal(out.hookSpecificOutput.permissionDecision, "ask");
+  assert.match(out.hookSpecificOutput.permissionDecisionReason, /unquoted destructive path/);
+});
+
+test("recursive flag asks for target verification", (t) => {
+  const dir = sandbox(t);
+  const out = run(guard, JSON.stringify(pre("rm -r target")), dir);
+  assert.equal(out.hookSpecificOutput.permissionDecision, "ask");
+  assert.match(out.hookSpecificOutput.permissionDecisionReason, /recursive or wildcard/);
+});
+
+test("in-place sed writes are flagged as shell modification", (t) => {
+  const dir = sandbox(t);
+  const out = run(guard, JSON.stringify(pre("sed -i s/a/b/ src/index.ts")), dir);
+  assert.equal(out.hookSpecificOutput.permissionDecision, "ask");
+  assert.match(out.hookSpecificOutput.permissionDecisionReason, /file modification via shell/);
+});
+
+test("follow-up offer at the tail of the turn is advisory", (t) => {
+  const dir = sandbox(t);
+  const transcript = join(dir, "transcript.jsonl");
+  writeFileSync(transcript, JSON.stringify({ role: "assistant", content: "작업을 마쳤습니다. 추가로 정리해 드릴까요?" }));
+  const out = run(guard, JSON.stringify({ hook_event_name: "Stop", transcript_path: transcript }), dir);
+  assert.match(out.systemMessage, /follow-up offer/);
+});
+
+test("three or more bullets without a scope declaration are advisory", (t) => {
+  const dir = sandbox(t);
+  const transcript = join(dir, "transcript.jsonl");
+  writeFileSync(transcript, JSON.stringify({ role: "assistant", content: "변경 사항:\n- a 수정\n- b 추가\n- c 삭제" }));
+  const out = run(guard, JSON.stringify({ hook_event_name: "Stop", transcript_path: transcript }), dir);
+  assert.match(out.systemMessage, /uncovered-scope/);
+});
