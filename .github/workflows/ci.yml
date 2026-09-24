@@ -14,6 +14,8 @@ jobs:
           node-version: "24"
       - name: Integrity suite (rules, links, entry points)
         run: bash test_integrity.sh --base .
+      - name: Contract drift check (vendored bytes vs PIN)
+        run: node scripts/check_contract_drift.mjs
       - name: Version consistency (plugin.json / RULES.md / 00-instinct)
         run: node scripts/sync-versions.mjs --base .
       - name: Syntax check enforced hook + MCP sources
@@ -35,6 +37,11 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "24"
+      - name: Contract drift check (checkout byte integrity)
+        run: node scripts/check_contract_drift.mjs
       - name: PowerShell integrity suite (fallback WARN is pass)
         shell: pwsh
         run: ./test_integrity.ps1 -BasePath . -Junction $env:TEMP/agentic-junction-probe
