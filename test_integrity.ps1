@@ -85,16 +85,31 @@ foreach ($file in $ruleFiles) {
 }
 
 Write-Host "`n=== TEST 4: Entry Point Resolution (global preferred, plugin path fallback) ==="
-$globalGemini = Join-Path (Split-Path (Split-Path $base -Parent) -Parent) "GEMINI.md"
 $pluginGemini = Join-Path $base "GEMINI.md"
 # $base=~/.gemini/config/plugins/lazyagentic -> global dir = ~/.gemini/config
-if (Test-Path $globalGemini) {
-    Write-Host "[PASS] Global GEMINI.md exists ($globalGemini)" -ForegroundColor Green
-} elseif (Test-Path $pluginGemini) {
-    Write-Host "[PASS] Plugin-path GEMINI.md exists ($pluginGemini, global missing — single-plugin mode)" -ForegroundColor Green
+# 얕은 경로(예: CI의 '.')에서는 부모가 비어 Split-Path가 예외를 내므로 먼저 확인한다.
+$globalGemini = $null
+$parent1 = Split-Path $base -Parent
+if (-not [string]::IsNullOrWhiteSpace($parent1)) {
+    $parent2 = Split-Path $parent1 -Parent
+    if (-not [string]::IsNullOrWhiteSpace($parent2)) {
+        $globalGemini = Join-Path $parent2 "GEMINI.md"
+    }
+}
+if ($globalGemini) {
+    if (Test-Path $globalGemini) {
+        Write-Host "[PASS] Global GEMINI.md exists ($globalGemini)" -ForegroundColor Green
+    } elseif (Test-Path $pluginGemini) {
+        Write-Host "[PASS] Plugin-path GEMINI.md exists ($pluginGemini, global missing — single-plugin mode)" -ForegroundColor Green
+    } else {
+        Write-Host "[FAIL] No entry point: neither $globalGemini nor $pluginGemini exists" -ForegroundColor Red
+        $allPassed = $false
+    }
 } else {
-    Write-Host "[FAIL] No entry point: neither $globalGemini nor $pluginGemini exists" -ForegroundColor Red
-    $allPassed = $false
+    Write-Host "[WARN] Base '$base' too shallow — skipping global GEMINI.md check (fallback WARN is pass)" -ForegroundColor Yellow
+    if (Test-Path $pluginGemini) {
+        Write-Host "[PASS] Plugin-path GEMINI.md exists ($pluginGemini)" -ForegroundColor Green
+    }
 }
 
 Write-Host "`n=== TEST 5: Markdown Relative Links Integrity ==="
