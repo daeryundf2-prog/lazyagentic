@@ -21,6 +21,7 @@ jobs:
       - name: Syntax check enforced hook + MCP sources
         run: |
           node --check enforced/hooks/intent-guard/intent-guard.mjs
+          node --check scripts/claim_verifier.mjs
           find enforced/mcp/lint-rules/src -name '*.mjs' -exec node --check {} +
           node --check enforced/mcp/lint-rules/eval/run_eval.mjs
       - name: lint-rules unit tests
