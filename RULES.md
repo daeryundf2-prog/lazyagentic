@@ -1,9 +1,9 @@
 # Agent Global Rule Set — Situational Path Reference System
 
 > **Created**: 2025-09-20 23:06 KST  
-> **Last updated**: 2026-10-03 15:52 KST  
+> **Last updated**: 2026-10-03  
 > **Modified by**: Claude Opus 5.5 (High), Antigravity  
-> **Version**: 3.29.0 (LazyAgentic Curated Edition)  
+> **Version**: 3.29.1 (LazyAgentic Curated Edition)  
 
 This file is the single, authoritative entry point for all AI agents (Gemini/Antigravity, Claude Code, Codex, etc.). It establishes a lightweight, on-demand situational routing system that prevents context-window bloat and token fatigue.
 

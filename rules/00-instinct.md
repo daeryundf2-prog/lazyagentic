@@ -104,8 +104,7 @@ In agentic frameworks, an agent cannot exit a turn without passing through confi
   - Deterministically catches unconfirmed destructive actions, unauthorized git commits, or out-of-scope code generation during plan-only phases, prompting for explicit user confirmation (`"permissionDecision": "ask"`).
 
 ### Reference Implementation & Runtime Activation
-- **Status**: Optional opt-in scaffold ships at `enforced/hooks/intent-guard/intent-guard.mjs`
-  (byte-identical copy at `hooks/intent-guard/intent-guard.mjs`). What it actually does:
+- **Status**: Optional opt-in scaffold ships at `enforced/hooks/intent-guard/intent-guard.mjs`. What it actually does:
   - `PreToolUse`: destructive shell patterns — `rm`/`del`/`Remove-Item` with
     recursive, wildcard, variable-expanded, or unquoted paths, plus shell
     write-redirects into source files — return `permissionDecision: "ask"`;
@@ -118,8 +117,8 @@ In agentic frameworks, an agent cannot exit a turn without passing through confi
   Plugin stays rules-only — no `hooks` key in `plugin.json` (see README "no hooks, no MCP").
   The 3-tier description above is an integration pattern for hosts that support lifecycle hooks;
   wire the scaffold path below only on hosts with hook runtimes.
-- **If you adopt it**: place your guard script at `hooks/intent-guard/intent-guard.mjs`
-  (or `~/agentic/hooks/intent-guard/intent-guard.mjs`) and register it below.
+- **If you adopt it**: place your guard script at `enforced/hooks/intent-guard/intent-guard.mjs`
+  (or `~/agentic/enforced/hooks/intent-guard/intent-guard.mjs`) and register it below.
   Until then, enforcement is by model compliance, not mechanical blocking.
 - **Runtime Activation (example, when implemented)**:
   - **Claude Code**: Merge into `~/.claude/settings.json` under `hooks` key.

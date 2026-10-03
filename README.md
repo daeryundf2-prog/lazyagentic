@@ -34,7 +34,6 @@ pwsh -File test_integrity.ps1 -BasePath . -Junction ./missing-junction
 node scripts/sync-versions.mjs --base .
 node --test enforced/mcp/lint-rules/test/*.test.mjs
 node enforced/mcp/lint-rules/eval/run_eval.mjs
-node --check hooks/intent-guard/intent-guard.mjs
 node --check enforced/hooks/intent-guard/intent-guard.mjs
 node --check enforced/mcp/lint-rules/src/cli.mjs
 ```

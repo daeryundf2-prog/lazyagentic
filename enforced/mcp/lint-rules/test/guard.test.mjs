@@ -7,7 +7,7 @@ import { tmpdir } from "node:os";
 import { fileURLToPath } from "node:url";
 
 const root = fileURLToPath(new URL("../../../../", import.meta.url));
-const guard = join(root, "hooks/intent-guard/intent-guard.mjs");
+const guard = join(root, "enforced/hooks/intent-guard/intent-guard.mjs");
 
 function sandbox(t) {
   const dir = mkdtempSync(join(tmpdir(), "lazyagentic-test-"));
@@ -95,8 +95,8 @@ test("isolated enforced-root installation resolves hooks and MCP independently o
   assert.equal(output.result.serverInfo.name, "lint-rules");
 });
 
-test("guard copies remain byte-identical", () => {
-  assert.equal(readFileSync(guard, "utf8"), readFileSync(join(root, "enforced/hooks/intent-guard/intent-guard.mjs"), "utf8"));
+test("guard script exists and is readable", () => {
+  assert.ok(readFileSync(guard, "utf8").length > 0);
 });
 
 function pre(input) {

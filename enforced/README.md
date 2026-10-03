@@ -49,7 +49,7 @@ node --check enforced/hooks/intent-guard/intent-guard.mjs
 node --check enforced/mcp/lint-rules/src/cli.mjs
 ```
 
-Tests include a persistent child-process MCP client, guard mode/logging tests, byte-identical guard-copy checks, and an installation smoke test under a disposable directory with spaces and an isolated HOME. The initial 60-row corpus is retained; additional synthetic report names, numbers, quotations, and source-preservation cases exercise the expanded contract. Corpus performance does not establish accuracy on real case materials. Precision/recall thresholds are asserted by the unit suite; the evaluation script is a report only.
+Tests include a persistent child-process MCP client, guard mode/logging tests, guard script checks, and an installation smoke test under a disposable directory with spaces and an isolated HOME. The initial 60-row corpus is retained; additional synthetic report names, numbers, quotations, and source-preservation cases exercise the expanded contract. Corpus performance does not establish accuracy on real case materials. Precision/recall thresholds are asserted by the unit suite; the evaluation script is a report only.
 
 ## Optional local logs
 

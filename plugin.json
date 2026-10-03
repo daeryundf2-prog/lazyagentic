@@ -1,7 +1,7 @@
 {
   "name": "lazyagentic",
   "version": "1.0.1",
-  "rulesVersion": "3.29.0",
+  "rulesVersion": "3.29.1",
   "description": "Agentic governance sanctuary for Google Antigravity (Gemini 3.8 Flash, Claude Opus/Sonnet 5.5) — situational routing and natural Korean prose policy.",
   "author": {
     "name": "daeryundf2-prog",

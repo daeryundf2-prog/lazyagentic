@@ -1,7 +1,7 @@
 {
   "name": "lazyagentic-enforced",
   "version": "1.0.0",
-  "rulesVersion": "3.29.0",
+  "rulesVersion": "3.29.1",
   "description": "Enforced split of lazyagentic — hooks + MCP lint for Korean prose (runs alongside rules-only body).",
   "hooks": "./hooks.json",
   "mcpServers": "./mcp_config.json"
