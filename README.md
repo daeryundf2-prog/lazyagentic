@@ -13,7 +13,7 @@ LazyAgentic is the governance plugin in the Lazy series. The main plugin is **ru
 
 ## What ships
 
-- **9 rule modules**, routed on demand by `RULES.md` v3.28.0. Numbers `02/05/06/10` are reserved.
+- **9 rule modules**, routed on demand by `RULES.md` v3.29.0. Numbers `02/05/06/10` are reserved.
 - Primary-source verification, uncertainty disclosure, workspace safety, scope reporting, Korean narrative style, and modern Go guidance.
 - Optional Dual-Mount access through `~/agentic` (Windows junction or POSIX symlink). When absent, use the installed plugin path. No link is created automatically.
 - **Separate opt-in package `enforced/`**: two hook registrations using one duplicated guard implementation, plus one persistent stdio MCP prose-scanner tool with 13 regex rules. See [enforced/README.md](enforced/README.md) for installation-root selection, host adapters, mode semantics, and limits.

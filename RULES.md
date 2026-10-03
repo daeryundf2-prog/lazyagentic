@@ -1,13 +1,13 @@
 # Agent Global Rule Set — Situational Path Reference System
 
 > **Created**: 2025-09-20 23:06 KST  
-> **Last updated**: 2026-09-04 17:15 KST  
-> **Modified by**: Gemini 3.8 Flash (High), Antigravity  
-> **Version**: 3.28.0 (LazyAgentic Curated Edition)  
+> **Last updated**: 2026-10-03 15:52 KST  
+> **Modified by**: Claude Opus 5.5 (High), Antigravity  
+> **Version**: 3.29.0 (LazyAgentic Curated Edition)  
 
 This file is the single, authoritative entry point for all AI agents (Gemini/Antigravity, Claude Code, Codex, etc.). It establishes a lightweight, on-demand situational routing system that prevents context-window bloat and token fatigue.
 
-**Antigravity + Gemini 3.8:** keep the session UI on Gemini 3.8 Flash (High). `~/agentic/` is a Directory Junction to this plugin. If that path is missing, read the same files under `~/.gemini/config/plugins/lazyagentic/`.
+**Antigravity:** follow the session model. `~/agentic/` is a Directory Junction to this plugin. If that path is missing, read the same files under `~/.gemini/config/plugins/lazyagentic/`.
 
 ---
 
