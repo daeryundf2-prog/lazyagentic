@@ -22,7 +22,8 @@ const CLAIM_KINDS = [
     tool: /build|tsc|compile|npm run|webpack|vite|esbuild/i },
   { kind: "lint-ok",
     claim: /린트(가|를)?\s*(통과|클린|성공)|lint(?:ing)? (?:passed|clean|ok)|no lint/i,
-    tool: /lint|biome|eslint|flake8|ruff|pylint|check/i },
+    // bare "check"는 제외 — `git checkout`, `node --check` 같은 비-린트 명령이 걸린다
+    tool: /lint|biome|eslint|flake8|ruff|pylint/i },
   { kind: "commit-made",
     claim: /커밋(을|를)?\s*(완료|했습니다|함)|committed|commit 완료/i,
     tool: /git\s+commit/i },
@@ -108,6 +109,10 @@ function verdictFor(claim, { toolUses, toolResults }, guardLog) {
     return hit
       ? { verdict: "corroborated", evidence: `guard log decision=${hit.decision} codes=${(hit.codes ?? []).join(",")}` }
       : { verdict: "contradicted", evidence: "guard log has no ask/block decision" };
+  }
+  if (!claim.tool) {
+    // --claims의 kind가 CLAIM_KINDS에 없는 경우 — 검증 불가 항목으로 표시하고 건너뛴다
+    return { verdict: "unsupported", evidence: `unknown claim kind "${claim.kind}" — not verifiable` };
   }
   const matched = toolUses.filter((u) => claim.tool.test(`${u.name} ${u.command}`));
   if (!matched.length) return { verdict: "unsupported", evidence: "no matching tool execution in transcript" };

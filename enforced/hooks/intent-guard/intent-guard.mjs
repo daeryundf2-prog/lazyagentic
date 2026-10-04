@@ -7,11 +7,13 @@ const PRAISE_OPENERS = [/^(좋은|훌륭한|멋진|정확한)\s*(질문|지적|�
 const FOLLOWUP_OFFERS = [/해\s*드릴까요/, /드릴까요[?？]?/, /would you like me to/i, /shall i (also|proceed|continue)/i, /want me to/i];
 const SCOPE_DECL = /범위|미커버|다루지 않|검토하지 않|커버하지|not covered|scope|unchecked|skipped|out of scope/i;
 const DESTRUCTIVE_RE = /\b(rm|del|erase|rmdir|rd|Remove-Item|Move-Item|Format-Volume)\b/i;
-const RECURSIVE_OR_WILD = /(\s-[a-zA-Z]*[rRfFS])|\s\*|-Recurse|\/S(?=\s|$)/;
+// 재귀 플래그는 r/R 계열만 — -f(force)/-F는 재귀가 아니다. 와일드카드·-Recurse·cmd /S도 감지.
+const RECURSIVE_OR_WILD = /\s--recursive\b|\s-[a-zA-Z]*[rR]|[\s/\\]\*|-Recurse|\/S(?=\s|$)/;
 const VAR_EXPAND_DELETE = /\$\{?[A-Za-z_][A-Za-z0-9_]*\}?\/\*|\$[A-Za-z_][A-Za-z0-9_]*\\?\*/;
 const PARAM_GUARD = /\$\{[A-Za-z_][A-Za-z0-9_]*:\?/;
 const SRC_EXT = "(?:py|js|mjs|cjs|ts|tsx|jsx|json|md|yml|yaml|sh|ps1|cmd|bat|html|css|go|rs|java|c|h|cpp|rb|pl|sql)";
-const SHELL_WRITE_RE = new RegExp("(?:^|[\\s;|&])(?<!\\d)>{1,2}\\s*[\"']?[^\\s\"']+\\." + SRC_EXT + "\\b|Set-Content|Out-File|Add-Content|sed\\s+-i", "i");
+// \d* 허용으로 `cmd 2> err.py` 같은 stderr 리다이렉트 쓰기도 잡는다 (구버전 (?<!\d) 회피 제거)
+const SHELL_WRITE_RE = new RegExp("(?:^|[\\s;|&])\\d*>{1,2}\\s*[\"']?[^\\s\"']+\\." + SRC_EXT + "\\b|Set-Content|Out-File|Add-Content|sed\\s+-i", "i");
 const REASONS = {
   clean: "No heuristic finding; this is not a safety or factuality attestation.",
   unavailable: "Guard input or current assistant transcript is unavailable.",
@@ -63,7 +65,7 @@ function lastAssistantText(transcript) {
   const lines = transcript.split("\n").filter((line) => line.trim());
   for (let i = lines.length - 1; i >= 0; i--) {
     let record;
-    try { record = JSON.parse(lines[i]); } catch { return null; }
+    try { record = JSON.parse(lines[i]); } catch { continue; } // 깨진 한 줄이 전체 감사를 중단시키지 않는다
     const role = record?.role ?? record?.message?.role;
     if (role === "user") return null;
     if (role !== "assistant" && role !== "model") continue;
