@@ -13,16 +13,17 @@ This file is the single, authoritative entry point for all AI agents (Gemini/Ant
 
 ## 1. CRITICAL MANDATES & SINGLE SESSION READ PRINCIPLE
 
-1. **Mandatory Session Start Read**:
-   - At the start of every session, before performing any tasks or replying to the user, you MUST read the following entry point files unconditionally:
+1. **Zero-Ceremony Pre-Injected Baseline & On-Demand Read**:
+   - When the host environment (`<user_rules>` in `GEMINI.md` / `AGENTS.md`) already injects the core invariants of `00-instinct.md` and `03-korean-natural-prose.md`, enforce those directives immediately **without burning Turn-1 `view_file` calls** on routine requests.
+   - In standalone environments without pre-injected host rules, or when full clause-level verification is needed, read:
      1. `~/agentic/rules/00-instinct.md` (Absolute top-level mandate: resolve uncertainty against primary source or stop and report; fail-closed instinct)
      2. `~/agentic/rules/03-korean-natural-prose.md` (Korean Natural Prose and Syntax Policy: eliminate translation-ese, zero-anaphora, no AI cliches, idiomatic Korean)
 
-2. **Situational Trigger Rule Read**:
-   - Before performing any task that matches a situational trigger listed in Section 2, you MUST read the referenced rule file (`~/agentic/rules/##-name.md`) with your file reading tool and strictly adhere to every instruction inside it without exception.
+2. **Situational Trigger Rule Read (On-Demand)**:
+   - When a substantive task requires specialized domain rules listed in Section 2 (`01` `.harness/`, `09` Go modernizer, `12` exhaustive enumeration, `13` tech vetting, or full `03`/`04`/`07`/`08`/`11` reference on complex tasks), read the referenced rule file (`~/agentic/rules/##-name.md`) once per session and strictly adhere to every instruction inside it.
 
 3. **Single Session Read Principle**:
-   - **Do NOT re-read a rule file if you have already read it in the current session.**
+   - **Do NOT re-read a rule file if you have already read it in the current session, or if its summary in `<user_rules>` already suffices for a simple query.**
    - Once a target rule file (`~/agentic/rules/##-name.md`) has been loaded into your context during the active session, refrain from executing redundant re-reads when encountering subsequent triggers for that file. Rely strictly on the recalled rule directives in your context memory.
    - **Drift exception**: if you catch yourself violating a rule, or the user points out a rule violation, or the session has grown long enough that recalled directives feel vague, re-read that specific rule file immediately. Prompt decay across turns is a documented failure mode — a re-read on drift is mandatory, not redundant.
 
