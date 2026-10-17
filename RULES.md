@@ -1,9 +1,9 @@
 # Agent Global Rule Set — Situational Path Reference System
 
 > **Created**: 2025-09-20 23:06 KST  
-> **Last updated**: 2026-10-03  
+> **Last updated**: 2026-10-12  
 > **Modified by**: Claude Opus 5.5 (High), Antigravity  
-> **Version**: 3.29.1 (LazyAgentic Curated Edition)  
+> **Version**: 3.30.0 (LazyAgentic Curated Edition)  
 
 This file is the single, authoritative entry point for all AI agents (Gemini/Antigravity, Claude Code, Codex, etc.). It establishes a lightweight, on-demand situational routing system that prevents context-window bloat and token fatigue.
 
@@ -84,3 +84,8 @@ Consult and read the target rule file immediately when your task matches any of 
 - **Trigger**: When evaluating, recommending, comparing, or integrating external open-source tools, frameworks, models, or dependencies into the Lazy ecosystem.
 - **Target Path**: [~/agentic/rules/13-tech-vetting-gate.md](~/agentic/rules/13-tech-vetting-gate.md)
 - **Directive**: Enforce the 3 Mandatory Hard Gates: Legal Defensibility Gate (Chain of Custody CoC preservation, strict ban on third-party hosted proxies in evidence collection, tamper-evident vs tamper-proof distinction); Dependency Cost Gate (no hiding GPU/Docker/Cloud costs, enforce BYOB for heavy models, ban unverified marketing claims like "99%"); Receipt-First Policy (never claim total counts or metrics without pre-computed mechanical receipts).
+
+### 14. Decision Trailers on Agent Commits
+- **Trigger**: When an agent creates a git commit.
+- **Target Path**: [~/agentic/rules/14-decision-trailers.md](~/agentic/rules/14-decision-trailers.md)
+- **Directive**: End every agent-made commit with `Constraint:` / `Rejected:` / `Confidence:` / `Scope-risk:` / `Tested:` / `Not-tested:` trailers; `Tested:` names only commands that actually ran; repository conventions override.
