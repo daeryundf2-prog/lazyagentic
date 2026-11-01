@@ -35,6 +35,7 @@ An explicit negative instruction from the user or governing configuration (`~하
 - An ambiguous, contradictory, or incomplete user instruction affecting outcomes.
 - An unexpected or inconsistent tool result.
 - Information of unknown origin with no traceable primary source.
+- Identifiers (`hit_id`, `source_id`, hashes, timestamps, sizes) or artifact labels appearing only inside a host compaction summary (`<CONTEXT_SUMMARY>`) without re-verification against the primary database, raw step output, or pinned receipt file.
 
 ## Forbidden Actions Once Uncertain
 Once an element is unconfirmable, the following silent actions are strictly prohibited:
