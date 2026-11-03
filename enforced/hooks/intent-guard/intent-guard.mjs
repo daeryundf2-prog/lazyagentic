@@ -66,6 +66,12 @@ function lastAssistantText(transcript) {
   for (let i = lines.length - 1; i >= 0; i--) {
     let record;
     try { record = JSON.parse(lines[i]); } catch { continue; } // 깨진 한 줄이 전체 감사를 중단시키지 않는다
+    if (record?.type === "USER_INPUT" || record?.source === "USER_EXPLICIT") return null;
+    if (record?.type === "PLANNER_RESPONSE" || record?.source === "MODEL") {
+      if (record?.type === "GENERIC") continue;
+      if (typeof record.content === "string" && record.content.trim()) return record.content.trim();
+      continue;
+    }
     const role = record?.role ?? record?.message?.role;
     if (role === "user") return null;
     if (role !== "assistant" && role !== "model") continue;
@@ -103,11 +109,11 @@ async function main() {
     event = input.hook_event_name ?? input.event ?? input.type;
     active = input.stop_hook_active === true;
     if (event === "PreToolUse") {
-      const name = input.tool_name ?? input.toolName ?? input.tool?.name;
+      const name = input.tool_name ?? input.toolName ?? input.tool?.name ?? input.toolCall?.name;
       if (typeof name !== "string" || !name) return unavailable(event, active);
       if (!/shell|bash|command|run|exec|terminal|powershell/i.test(name)) return emit({}, "allow", ["clean"]);
-      const args = input.tool_input ?? input.toolInput ?? input.parameters ?? input.args ?? input.input;
-      const cmd = args?.command ?? args?.cmd ?? args?.shell_command ?? args?.script;
+      const args = input.tool_input ?? input.toolInput ?? input.parameters ?? input.args ?? input.input ?? input.toolCall?.args;
+      const cmd = args?.command ?? args?.cmd ?? args?.shell_command ?? args?.script ?? args?.CommandLine;
       if (typeof cmd !== "string" || !cmd.trim()) return unavailable(event, active);
       const code = commandHit(cmd);
       return preDecision(code ? "ask" : "allow", code ?? "clean");

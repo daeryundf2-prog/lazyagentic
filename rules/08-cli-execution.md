@@ -39,3 +39,8 @@
 8. **Untrusted `.env` Runtime Hijacking Sandbox Defense (Ouroboros Isolation)**:
    - When inspecting or running commands in a workspace, NEVER source `.env` blindly or allow arbitrary workspace `.env` files to inject runtime hijacking environment variables (`NODE_OPTIONS`, `PYTHONPATH`, `PYTHONSTARTUP`, `PERL5OPT`, `RUBYOPT`, `LD_PRELOAD`, `DYLD_INSERT_LIBRARIES`).
    - Any CLI harness command execution must sanitize or explicitly deny module-resolution overrides from untrusted sources to preserve host and subagent sandbox integrity.
+
+
+9. **Single-Approval-Tool-Per-Turn & Non-Blocking Hook I/O (`#1249` / CLI 1.4.12)**:
+   - When calling a tool that may prompt for user approval (`run_command`, `execute_command`), invoke at most one approval tool per turn and do not mix it with parallel tool calls in the same turn (`antigravity-cli #1249`).
+   - Lifecycle hooks reading `stdin` or session transcripts must cap `stdin` wait (`1500ms` with early JSON resolve, `stdin.pause()`, and `timer.unref()`) and bound transcript tail reads (`readTailLines` 5 lines / 32 KB, widening to 512 KB only when the last line exceeds 32 KB) so large sessions never stall the host deadline.

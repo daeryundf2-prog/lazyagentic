@@ -1,5 +1,5 @@
 # 00. Instinct (TOP-LEVEL, OVERRIDES ALL OTHER RULES)
-> **Created**: 2025-09-03 14:00 KST | **Last updated**: 2026-08-31 11:00 KST | **Version**: 2.17.0
+> **Created**: 2025-09-03 14:00 KST | **Last updated**: 2026-11-03 11:00 KST | **Version**: 2.18.0
 
 ## Mandatory Session-Start Directive (ABSOLUTE MANDATE)
 This document is an absolute top-level mandate loaded at the start of every session before performing any task or replying to the user. It outranks all other rules unconditionally.
@@ -33,7 +33,7 @@ An explicit negative instruction from the user or governing configuration (`~하
 - An identifier, value, or fact unconfirmable against a primary source.
 - A decision point with multiple plausible interpretations and no objective basis to choose.
 - An ambiguous, contradictory, or incomplete user instruction affecting outcomes.
-- An unexpected or inconsistent tool result.
+- An unexpected or inconsistent tool result, or a failed/timed-out/denied lookup (report as "확인하지 못함", never as "없음" or feature non-support).
 - Information of unknown origin with no traceable primary source.
 - Identifiers (`hit_id`, `source_id`, hashes, timestamps, sizes) or artifact labels appearing only inside a host compaction summary (`<CONTEXT_SUMMARY>`) without re-verification against the primary database, raw step output, or pinned receipt file.
 
@@ -116,11 +116,7 @@ In agentic frameworks, an agent cannot exit a turn without passing through confi
     `LAZYAGENTIC_GUARD_MODE=strict` on an active stop hook). Fails open on
     unavailable input.
   Plugin stays rules-only — no `hooks` key in `plugin.json` (see README "no hooks, no MCP").
-  The 3-tier description above is an integration pattern for hosts that support lifecycle hooks;
-  wire the scaffold path below only on hosts with hook runtimes.
-- **If you adopt it**: place your guard script at `enforced/hooks/intent-guard/intent-guard.mjs`
-  (or `~/agentic/enforced/hooks/intent-guard/intent-guard.mjs`) and register it below.
-  Until then, enforcement is by model compliance, not mechanical blocking.
+  Wire `enforced/hooks/intent-guard/intent-guard.mjs` (or `~/agentic/enforced/hooks/intent-guard/intent-guard.mjs`) only on hosts with lifecycle hook runtimes; until then, enforcement is by model compliance, not mechanical blocking.
 - **Runtime Activation (example, when implemented)**:
   - **Claude Code**: Merge into `~/.claude/settings.json` under `hooks` key.
   - **Antigravity / Gemini**: Configure in `.agents/hooks.json` or `~/.gemini/config/hooks.json` under `Stop` and `PreInvocation`.

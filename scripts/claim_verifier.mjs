@@ -42,11 +42,34 @@ function parseJsonl(path) {
 }
 
 // 트랜스크립트에서 {toolUses:[{name,command,id}], toolResults:[{isError,text}]} 추출.
-// Claude Code(envelope)와 단순 {role,content} 두 형태를 모두 지원한다.
+// Claude Code(envelope), 단순 {role,content}, Antigravity(PLANNER_RESPONSE/GENERIC) 세 형태를 모두 지원한다.
 function extractToolActivity(records) {
   const toolUses = [];
   const toolResults = [];
+  let agyPendingIds = [];
   for (const rec of records) {
+    if (rec?.type === "PLANNER_RESPONSE" && Array.isArray(rec.tool_calls)) {
+      agyPendingIds = [];
+      for (let idx = 0; idx < rec.tool_calls.length; idx++) {
+        const tc = rec.tool_calls[idx];
+        const rawCmd = tc?.args?.CommandLine ?? tc?.args?.command ?? tc?.args?.cmd ?? "";
+        let cmd = String(rawCmd);
+        if (cmd.startsWith('"') && cmd.endsWith('"')) {
+          try { cmd = JSON.parse(cmd); } catch {}
+        }
+        const id = tc?.id ?? `agy_${rec.step_index ?? 0}_${idx}`;
+        toolUses.push({ name: tc?.name ?? "", command: String(cmd), id });
+        agyPendingIds.push(id);
+      }
+      continue;
+    }
+    if (rec?.type === "GENERIC" && rec?.source === "MODEL" && agyPendingIds.length > 0) {
+      const text = String(rec.content ?? "");
+      const isError = rec.status === "ERROR" || /Command exited with code [1-9]\d*/.test(text);
+      const id = agyPendingIds.shift();
+      toolResults.push({ isError, text, toolUseId: id });
+      continue;
+    }
     const msg = rec.message ?? rec;
     const role = msg.role ?? rec.role;
     const content = msg.content ?? rec.content;
@@ -77,9 +100,15 @@ function extractToolActivity(records) {
 
 function lastAssistantText(records) {
   for (let i = records.length - 1; i >= 0; i--) {
-    const msg = records[i].message ?? records[i];
-    if ((msg.role ?? records[i].role) === "user") return null;
-    if ((msg.role ?? records[i].role) !== "assistant") continue;
+    const rec = records[i];
+    if (rec?.type === "USER_INPUT" || rec?.source === "USER_EXPLICIT") return null;
+    if (rec?.type === "PLANNER_RESPONSE") {
+      if (typeof rec.content === "string" && rec.content.trim()) return rec.content;
+      continue;
+    }
+    const msg = rec.message ?? rec;
+    if ((msg.role ?? rec.role) === "user") return null;
+    if ((msg.role ?? rec.role) !== "assistant") continue;
     const content = msg.content;
     if (typeof content === "string") return content;
     if (Array.isArray(content)) {

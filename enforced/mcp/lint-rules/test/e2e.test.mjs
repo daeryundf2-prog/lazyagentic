@@ -126,3 +126,30 @@ test("claim verifier checks guard-blocked claims against the decision log", (t) 
   const claim = out.claims.find((c) => c.kind === "guard-blocked");
   assert.equal(claim.verdict, "corroborated");
 });
+
+test("intent-guard and claim_verifier support Antigravity PLANNER_RESPONSE/GENERIC transcripts", (t) => {
+  const dir = sandbox(t);
+  const guard = join(root, "enforced/hooks/intent-guard/intent-guard.mjs");
+  const agyTranscript = join(dir, "agy-transcript.jsonl");
+  writeFileSync(agyTranscript, [
+    { step_index: 1, source: "USER_EXPLICIT", type: "USER_INPUT", content: "테스트 돌려줘" },
+    { step_index: 2, source: "MODEL", type: "PLANNER_RESPONSE", status: "DONE", tool_calls: [
+      { name: "run_command", args: { CommandLine: JSON.stringify("npm test") } },
+    ] },
+    { step_index: 3, source: "MODEL", type: "GENERIC", status: "DONE", content: "Command exited with code 0.\n31 passed" },
+    { step_index: 4, source: "MODEL", type: "PLANNER_RESPONSE", status: "DONE", content: "Great question! 모든 테스트가 통과했습니다." },
+  ].map(JSON.stringify).join("\n"));
+
+  const stopRes = run(guard, JSON.stringify({ hook_event_name: "Stop", transcriptPath: agyTranscript }), dir);
+  assert.equal(stopRes.status, 0, stopRes.stderr);
+  assert.match(JSON.parse(stopRes.stdout).systemMessage, /praise opener/);
+
+  const preRes = run(guard, JSON.stringify({ hook_event_name: "PreToolUse", toolCall: { name: "run_command", args: { CommandLine: "rm -rf /tmp/x" } } }), dir);
+  assert.equal(preRes.status, 0, preRes.stderr);
+  assert.equal(JSON.parse(preRes.stdout).hookSpecificOutput.permissionDecision, "ask");
+
+  const proc = spawnSync(process.execPath, [verifier, "--transcript", agyTranscript], { encoding: "utf8", timeout: 5000 });
+  assert.equal(proc.status, 0, proc.stderr);
+  const out = JSON.parse(proc.stdout);
+  assert.equal(out.claims.find((c) => c.kind === "tests-pass").verdict, "corroborated");
+});
