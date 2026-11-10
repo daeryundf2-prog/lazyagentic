@@ -3,7 +3,7 @@
 > **Created**: 2025-09-20 23:06 KST  
 > **Last updated**: 2026-11-03  
 > **Modified by**: Gemini 4 Argon, Claude Opus 5.5 (High), Antigravity  
-> **Version**: 3.30.0 (LazyAgentic Curated Edition)  
+> **Version**: 3.31.0 (LazyAgentic Curated Edition)  
 
 This file is the single, authoritative entry point for all AI agents (Gemini/Antigravity, Claude Code, Codex, etc.). It establishes a lightweight, on-demand situational routing system that prevents context-window bloat and token fatigue.
 
@@ -20,7 +20,7 @@ This file is the single, authoritative entry point for all AI agents (Gemini/Ant
      2. `~/agentic/rules/03-korean-natural-prose.md` (Korean Natural Prose and Syntax Policy: eliminate translation-ese, zero-anaphora, no AI cliches, idiomatic Korean)
 
 2. **Situational Trigger Rule Read (On-Demand)**:
-   - When a substantive task requires specialized domain rules listed in Section 2 (`01` `.harness/`, `09` Go modernizer, `12` exhaustive enumeration, `13` tech vetting, or full `03`/`04`/`07`/`08`/`11` reference on complex tasks), read the referenced rule file (`~/agentic/rules/##-name.md`) once per session and strictly adhere to every instruction inside it.
+   - When a substantive task requires specialized domain rules listed in Section 2 (`01` `.harness/`, `09` Go modernizer, `12` exhaustive enumeration, `13` tech vetting, `14` skill contract template, or full `03`/`04`/`07`/`08`/`11` reference on complex tasks), read the referenced rule file (`~/agentic/rules/##-name.md`) once per session and strictly adhere to every instruction inside it.
 
 3. **Single Session Read Principle**:
    - **Do NOT re-read a rule file if you have already read it in the current session, or if its summary in `<user_rules>` already suffices for a simple query.**
@@ -84,3 +84,8 @@ Consult and read the target rule file immediately when your task matches any of 
 - **Trigger**: When evaluating, recommending, comparing, or integrating external open-source tools, frameworks, models, or dependencies into the Lazy ecosystem.
 - **Target Path**: [~/agentic/rules/13-tech-vetting-gate.md](~/agentic/rules/13-tech-vetting-gate.md)
 - **Directive**: Enforce the 3 Mandatory Hard Gates: Legal Defensibility Gate (Chain of Custody CoC preservation, strict ban on third-party hosted proxies in evidence collection, tamper-evident vs tamper-proof distinction); Dependency Cost Gate (no hiding GPU/Docker/Cloud costs, enforce BYOB for heavy models, ban unverified marketing claims like "99%"); Receipt-First Policy (never claim total counts or metrics without pre-computed mechanical receipts).
+
+### 14. Skill & Instruction Contract Template
+- **Trigger**: When authoring, rewriting, or reviewing a skill (`SKILL.md`), an agent instruction document, or a rule module whose activation, authority, or stop condition must be unambiguous.
+- **Target Path**: [~/agentic/rules/14-skill-contract-template.md](~/agentic/rules/14-skill-contract-template.md)
+- **Directive**: Give every skill-like document one nine-row `instruction_contract` table (Intent/Trigger/Scope/Authority/Evidence/Loop/Output/Verification/Stop), 3 positive + 3 negative + 3 boundary activation examples, and an explicit do-not-use list. Empty cells are defects; a skill never widens its own authority.
