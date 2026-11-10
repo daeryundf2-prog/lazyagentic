@@ -6,6 +6,14 @@ hypercore
   Used in: rules/14-skill-contract-template.md (instruction_contract table and
            positive/negative/boundary activation example shape, adapted from
            skills/hyper-loop/SKILL.md; wording rewritten)
+           rules/15-external-text-defense.md (defense layers and source ledger,
+           adapted from skills/hyper-documentation/rules/prompt/context-source-safety.md)
+           rules/16-single-writer-per-repository.md (single-writer boundary,
+           adapted from skills/hyper-git/rules/agent-parallelism.md)
+           rules/17-approval-tiers.md (approval tiers, four-item stop report,
+           presence-only credential check, adapted from
+           skills/hyper-deploy/rules/safety-gates.md and
+           skills/hyper-google-analytics/rules/safety-gates.md; wording rewritten)
 
 MIT License
 
